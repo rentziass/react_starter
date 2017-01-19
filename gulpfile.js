@@ -42,12 +42,13 @@ var bundler = watchify(browserify({
   fullPaths: true
 }));
 
-function bundle() {
+function bundle(file) {
+  if (file) gutil.log('Recompiling ' + file);
   return bundler
     .bundle()
-    .on('error', notify)
+    .on('error', gutil.log.bind(gutil, 'Browserify error'))
     .pipe(source('main.js'))
-    .pipe(gulp.dest('./www/js'))
+    .pipe(gulp.dest('./www/js'));
 }
 bundler.on('update', bundle);
 
@@ -68,12 +69,12 @@ gulp.task('serve', function(done) {
           }
         }
       },
-      open: true
+      open: false
     }));
 });
 
 gulp.task('sass', function () {
-  gulp.src('.src/sass/**/*.scss')
+  gulp.src('src/sass/**/*.scss')
     .pipe(sass().on('error', sass.logError))
     .pipe(concat('style.css'))
     .pipe(gulp.dest('./www/css'));
@@ -82,5 +83,35 @@ gulp.task('sass', function () {
 gulp.task('default', ['build', 'serve', 'sass', 'watch']);
 
 gulp.task('watch', function () {
-  gulp.watch('./sass/**/*.scss', ['sass']);
+  gulp.watch('src/sass/**/*.scss', ['sass']);
 });
+
+// var gulp = require ('gulp');
+// var gutil = require ('gulp-util');
+// var source = require ('vinyl-source-stream');
+// var browserify = require ('browserify');
+// var watchify = require ('watchify');
+// var reactify = require ('reactify');
+//
+// gulp.task('default', function(){
+//   var bundler = watchify(browserify({
+//     entries: ['./src/jsx/app.jsx'],
+//     transform: [reactify],
+//     extensions: ['.jsx'],
+//     debug: true,
+//     cache: {},
+//     packageCache: {},
+//     fullPaths: true
+//   }))
+//
+//   function build(file) {
+//     if (file) gutil.log('Recompiling ' + file);
+//     return bundler
+//       .bundle()
+//       .on('error', gutil.log.bind(gutil, 'Browserify error'))
+//       .pipe(source('main.js'))
+//       .pipe(gulp.dest('./www/js'));
+//   };
+//   build()
+//   bundler.on('update', build)
+// });
